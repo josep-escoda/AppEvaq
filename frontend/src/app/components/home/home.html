@@ -1,0 +1,143 @@
+<div class="mx-auto px-4 py-6 sm:px-6 lg:px-8">
+  <div class="grid gap-6 lg:grid-cols-[280px_1fr_280px]">
+
+    <aside class="space-y-4">
+      <div class="rounded-lg border border-border bg-card shadow-sm">
+        <div class="border-b border-border px-4 py-3">
+          <h3 class="text-sm font-semibold text-card-foreground">Plantes de l'Edifici</h3>
+        </div>
+        <div class="divide-y divide-border">
+          <button *ngFor="let planta of plantes" (click)="seleccionarPlanta(planta.numero)"
+            [class.bg-primary]="plantaSeleccionada === planta.numero"
+            [class.text-primary-foreground]="plantaSeleccionada === planta.numero"
+            [class.hover:bg-accent]="plantaSeleccionada !== planta.numero"
+            class="flex w-full items-center justify-between px-4 py-3 text-left transition-colors">
+            <div class="flex items-center gap-3">
+              <div [class.bg-emerald-500]="plantaSeleccionada === planta.numero"
+                [class.bg-muted]="plantaSeleccionada !== planta.numero" class="h-2 w-2 rounded-full transition-colors">
+              </div>
+              <span class="text-sm font-medium">{{ planta.nom }}</span>
+            </div>
+
+            <span
+              class="inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors"
+              [class.bg-red-100]="getNoVerificatsPlanta(planta.numero) > 0"
+              [class.text-red-700]="getNoVerificatsPlanta(planta.numero) > 0"
+
+              [class.bg-green-100]="getNoVerificatsPlanta(planta.numero) === 0"
+              [class.text-green-700]="getNoVerificatsPlanta(planta.numero) === 0">
+              {{ getNoVerificatsPlanta(planta.numero) }}
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <ng-content select="[sidebar-bottom]"></ng-content>
+    </aside>
+
+    <main class="rounded-lg border border-border bg-card shadow-sm">
+      <div class="border-b border-border px-4 py-3">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-semibold text-card-foreground">
+            Visor de Planols
+            <span class="ml-1 text-muted-foreground">- {{ nomPlantaSeleccionada }}</span>
+          </h2>
+          <div class="flex items-center gap-2">
+            <button (click)="zoomOut()" class="rounded-md border border-input bg-background p-2 hover:bg-accent">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+              </svg>
+            </button>
+            <span class="min-w-[60px] text-center text-sm text-muted-foreground">{{ (zoomLevel * 100).toFixed(0)
+              }}%</span>
+            <button (click)="zoomIn()" class="rounded-md border border-input bg-background p-2 hover:bg-accent">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+              </svg>
+            </button>
+            <button (click)="resetView()"
+              class="rounded-md border border-input bg-background px-3 py-2 text-sm hover:bg-accent">
+              Reiniciar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="relative w-full h-[calc(100vh-300px)] min-h-[500px] overflow-hidden bg-muted/30"
+        (mousedown)="onMouseDown($event)" (mousemove)="onMouseMove($event)" (mouseup)="onMouseUp()"
+        (mouseleave)="onMouseUp()">
+
+        <div *ngIf="plantaActual" class="absolute inset-0 flex items-center justify-center overflow-hidden">
+          <div [style.transform]="getTransform()" class="relative transition-transform duration-300 ease-out"
+            style="transform-origin: center center;">
+
+            <div class="relative">
+              <img #imgRef [src]="plantaActual.imatge" [alt]="plantaActual.nom" class="max-w-full object-contain"
+                draggable="false">
+
+              <svg (click)="onSvgClick($event)" class="absolute top-0 left-0 w-full h-full pointer-events-auto"
+                [class.cursor-crosshair]="modeEditor !== 'none'"
+                [class.cursor-pointer]="modeEditor === 'delete' || (modeEditor === 'edit' && !puntsTemporals.length) || modeResponsable"
+                [attr.viewBox]="'0 0 ' + imgRef.clientWidth + ' ' + imgRef.clientHeight">
+                <g *ngFor="let space of spacesPlantaActual">
+                  <!-- Polígon amb menys opacitat -->
+                  <polygon 
+                    [attr.points]="getPuntsAbsoluts(space.coordinates)" 
+                    [attr.fill]="space.color"
+                    fill-opacity="0.15" 
+                    [attr.stroke]="space.color" 
+                    stroke-width="1.5"
+                    class="transition-all duration-200 hover:fill-opacity-30" />
+
+                  <!-- Text centrat al polígon -->
+                  <text 
+                    [attr.x]="getCentrePoligon(space.coordinates).x" 
+                    [attr.y]="getCentrePoligon(space.coordinates).y" 
+                    fill="white" 
+                    font-size="11" 
+                    font-weight="600" 
+                    text-anchor="middle" 
+                    dominant-baseline="middle"
+                    class="pointer-events-none select-none"
+                    style="text-shadow: 
+                      1px 1px 3px rgba(0,0,0,0.9), 
+                      -1px -1px 3px rgba(0,0,0,0.9),
+                      1px -1px 3px rgba(0,0,0,0.9),
+                      -1px 1px 3px rgba(0,0,0,0.9);">
+                    {{ space.name }}
+                  </text>
+                </g>
+
+                <g *ngIf="(modeEditor === 'create' || modeEditor === 'edit') && puntsTemporals.length > 0">
+                  <polygon *ngIf="puntsTemporals.length >= 3" [attr.points]="getPuntsAbsoluts(puntsTemporals)"
+                    fill="#3b82f6" fill-opacity="0.3" stroke="#3b82f6" stroke-width="3" stroke-dasharray="5,5" />
+
+                  <g *ngFor="let punt of puntsTemporals; let i = index">
+                    <circle [attr.cx]="punt.x * imgRef.clientWidth" [attr.cy]="punt.y * imgRef.clientHeight" r="6"
+                      fill="#3b82f6" stroke="white" stroke-width="2" />
+                    <text [attr.x]="punt.x * imgRef.clientWidth" [attr.y]="punt.y * imgRef.clientHeight - 12"
+                      fill="white" font-size="12" font-weight="bold" text-anchor="middle" class="pointer-events-none"
+                      style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">
+                      {{ i + 1 }}
+                    </text>
+                  </g>
+
+                  <polyline [attr.points]="getPuntsAbsoluts(puntsTemporals)" fill="none" stroke="#3b82f6"
+                    stroke-width="2" stroke-dasharray="5,5" />
+                </g>
+
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <aside class="space-y-4">
+      <ng-content select="[sidebar-right]"></ng-content>
+    </aside>
+
+  </div>
+</div>

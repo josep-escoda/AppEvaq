@@ -1,0 +1,70 @@
+<app-home 
+  [spaces]="spacesPlantaActual" 
+  [modeEditor]="'none'" 
+  [puntsTemporals]="[]"
+  [colorMode]="'status'"
+  (plantaChange)="onPlantaSeleccionada($event)" 
+  >
+
+  <div sidebar-bottom class="space-y-4">
+
+    <!-- Estadístiques -->
+    <div class="rounded-lg border border-border bg-card shadow-sm">
+      <div class="border-b border-border px-4 py-3">
+        <h3 class="text-sm font-semibold text-card-foreground">Estadístiques</h3>
+      </div>
+      <div class="p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-muted-foreground">Total espais:</span>
+          <span class="text-sm font-bold">{{ totalSpaces }}</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-muted-foreground">Verificats:</span>
+          <span class="text-sm font-bold text-green-600">{{ spacesVerificats }}</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-muted-foreground">No verificats:</span>
+          <span class="text-sm font-bold text-red-600">{{ spacesNoVerificats }}</span>
+        </div>
+        
+        <!-- Barra de progrés -->
+        <div class="pt-2">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs text-muted-foreground">Progrés verificació</span>
+            <span class="text-xs font-semibold">{{ percentatgeVerificat }}%</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              class="bg-green-600 h-2 rounded-full transition-all duration-500"
+              [style.width.%]="percentatgeVerificat">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Llegenda de colors -->
+    <div class="rounded-lg border border-border bg-card shadow-sm">
+      <div class="border-b border-border px-4 py-3">
+        <h3 class="text-sm font-semibold text-card-foreground">Llegenda</h3>
+      </div>
+      <div class="p-4 space-y-2">
+        <div class="flex items-center gap-2">
+          <div class="w-4 h-4 rounded bg-green-600"></div>
+          <span class="text-xs">Espai verificat</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="w-4 h-4 rounded bg-red-600"></div>
+          <span class="text-xs">Espai no verificat</span>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" class="rounded-lg border border-border bg-card shadow-sm p-4">
+      <div class="flex items-center justify-center">
+        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+      </div>
+    </div>
+
+  </div>
+</app-home>

@@ -1,0 +1,24 @@
+<div style="position: fixed; top: 1rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 1000;">
+
+  <div *ngFor="let n of notifications" 
+       style="padding: 0.75rem 1rem; border-left: 4px solid; border-radius: 0.5rem; box-shadow: 0 2px 6px rgba(0,0,0,0.2);"
+       [style.backgroundColor]="
+         n.type === 'success' ? '#d1fae5' :
+         n.type === 'info' ? '#bfdbfe' :
+         '#fee2e2'
+       "
+       [style.borderColor]="
+         n.type === 'success' ? '#065f46' :
+         n.type === 'info' ? '#1e40af' :
+         '#991b1b'
+       "
+       [style.color]="
+         n.type === 'success' ? '#065f46' :
+         n.type === 'info' ? '#1e40af' :
+         '#991b1b'
+       ">
+
+    <strong>{{ n.type | titlecase }}:</strong> {{ n.message }}
+
+  </div>
+</div>

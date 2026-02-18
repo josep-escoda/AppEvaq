@@ -1,0 +1,59 @@
+<div class="container mx-auto px-4 py-8 max-w-6xl">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-900">Historial d'Evacuacions</h1>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex justify-center items-center py-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  </div>
+
+  <!-- Llista d'evacuacions -->
+  <div *ngIf="!loading && evacuations.length > 0" class="space-y-4">
+    <div 
+      *ngFor="let evacuation of evacuations" 
+      class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+      
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-xl font-semibold text-gray-900">Evacuació #{{ evacuation.id }}</span>
+        <span 
+          [class]="evacuation.active ? 'bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold' : 'bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-semibold'">
+          {{ evacuation.active ? 'ACTIVA' : 'FINALITZADA' }}
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <p class="text-sm text-gray-500">Data inici</p>
+          <p class="text-gray-900 font-medium">{{ formatDate(evacuation.started_at) }}</p>
+        </div>
+
+        <div>
+          <p class="text-sm text-gray-500">Data fi</p>
+          <p class="text-gray-900 font-medium">
+            {{ evacuation.ended_at ? formatDate(evacuation.ended_at) : 'En curs' }}
+          </p>
+        </div>
+
+        <div>
+          <p class="text-sm text-gray-500">Duració</p>
+          <p class="text-gray-900 font-medium">
+            {{ getDuration(evacuation.started_at, evacuation.ended_at) }}
+          </p>
+        </div>
+
+        <div *ngIf="evacuation.unverified_spaces_count !== null">
+          <p class="text-sm text-gray-500">Espais no verificats</p>
+          <p class="text-gray-900 font-medium">{{ evacuation.unverified_spaces_count }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div 
+    *ngIf="!loading && evacuations.length === 0" 
+    class="bg-white rounded-lg shadow-md p-12 text-center">
+    <p class="text-gray-500 text-lg">No hi ha evacuacions registrades</p>
+  </div>
+</div>
